@@ -47,3 +47,33 @@ for sentence in sentences:
 if current_passage:
     passages.append(current_passage.strip())
 
+qg_pipeline = pipeline("text-generation", model="valhalla/t5-base-qg-hl")
+
+def generate_questions_pipeline(passage, min_questions=3):
+    input_text = f"generate questions: {passage}"
+    results = qg_pipeline(input_text)
+    questions = results[0]['generated_text'].split('<sep>')
+    
+    # ensure we have at least 3 questions
+    questions = [q.strip() for q in questions if q.strip()]
+    
+    # if fewer than 3 questions, try to regenerate from smaller parts of the passage
+    if len(questions) < min_questions:
+        passage_sentences = passage.split('. ')
+        for i in range(len(passage_sentences)):
+            if len(questions) >= min_questions:
+                break
+            additional_input = ' '.join(passage_sentences[i:i+2])
+            additional_results = qg_pipeline(f"generate questions: {additional_input}")
+            additional_questions = additional_results[0]['generated_text'].split('<sep>')
+            questions.extend([q.strip() for q in additional_questions if q.strip()])
+    
+    return questions[:min_questions]
+
+for idx, passage in enumerate(passages):
+    questions = generate_questions_pipeline(passage)
+    print(f"Passage {idx+1}:\n{passage}\n")
+    print("Generated Questions:")
+    for q in questions:
+        print(f"- {q}")
+    print(f"\n{'-'*50}\n")
