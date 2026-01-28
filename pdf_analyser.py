@@ -1,4 +1,5 @@
 import pdfplumber
+from transformers import pipeline
 
 pdf_path = "D:/projects/document-analysis/content/google_terms_of_service_en_in.pdf"
 
@@ -20,3 +21,14 @@ with open("D:/projects/document-analysis/extracted_text.txt", "r") as file:
 
 # preview the document content
 print(document_text[:500])
+
+summarizer = pipeline("text-generation", model="t5-small")
+
+summary = summarizer(
+    "summarize: " + document_text[:1000],
+    max_length=150,
+    min_length=30,
+    do_sample=False
+)
+
+print("Summary:", summary[0]["generated_text"])
