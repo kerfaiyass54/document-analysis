@@ -77,3 +77,23 @@ for idx, passage in enumerate(passages):
     for q in questions:
         print(f"- {q}")
     print(f"\n{'-'*50}\n")
+
+
+qa_pipeline = pipeline("question-answering", model="deepset/roberta-base-squad2")
+
+
+def answer_unique_questions(passages, qa_pipeline):
+    answered_questions = set()  # to store unique questions
+
+    for idx, passage in enumerate(passages):
+        questions = generate_questions_pipeline(passage)
+
+        for question in questions:
+            if question not in answered_questions:
+                answer = qa_pipeline({'question': question, 'context': passage})
+                print(f"Q: {question}")
+                print(f"A: {answer['answer']}\n")
+                answered_questions.add(question) 
+        print(f"{'='*50}\n")
+              
+answer_unique_questions(passages, qa_pipeline)
