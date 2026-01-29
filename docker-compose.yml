@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  app:
+    analyzer: 
+    image: python:3.14.2-alpine
+    ports:
+      - "8084:8080"
+    volumes:
+      - ./results:/app/results
+    restart: unless-stopped
+    command: ["pip","install","transformers","torch","nltk","pdfplumber"]
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
